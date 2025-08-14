@@ -30,39 +30,49 @@ Testing the webserver
 server.py
 ```
 import socket
-HOST = '127.0.0.1' 
-PORT = 65432 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen()
-    print(f"Server started. Listening on {HOST}:{PORT}...")
-    conn, addr = s.accept()
-    with conn:
-        print(f"Connected by {addr}")
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            conn.sendall(data)
+
+# Create a TCP/IP socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Bind the socket to an address and port
+server_socket.bind(('localhost', 12345))
+server_socket.listen(1)
+
+print("Server is listening on port 12345...")
+
+# Wait for a connection
+conn, addr = server_socket.accept()
+print(f"Connected by {addr}")
+
+while True:
+    data = conn.recv(1024)
+    if not data:  # If no data, client closed connection
+        break
+    print(f"Received from client: {data.decode()}")
+    conn.sendall(data)  # Echo back the same data
+
+conn.close()
+
 ```
 client.py
 ```
 import socket
 
+# Create a TCP/IP socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 65432  # The port used by the server
+# Connect to the server
+client_socket.connect(('localhost', 12345))
 
+while True:
+    msg = input("Enter message (type 'exit' to quit): ")
+    if msg.lower() == 'exit':
+        break
+    client_socket.sendall(msg.encode())
+    data = client_socket.recv(1024)
+    print(f"Echo from server: {data.decode()}")
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
-    s.sendall(b"Hello, world")
-    data = s.recv(1024)
-
-
-print(f"Received {data!r}")
-
-
+client_socket.close()
       
 ```
 ##  Architecture Diagram
@@ -94,10 +104,13 @@ print(f"Received {data!r}")
 
 ## OUTPUT:
 ### CLIENT OUTPUT:
-![WhatsApp Image 2025-08-14 at 08 20 39_2404d095](https://github.com/user-attachments/assets/a0a167a8-13f8-45f0-8dfc-de3f57af1ea2)
+<img width="825" height="417" alt="Screenshot 2025-08-14 084829" src="https://github.com/user-attachments/assets/933b1134-7c52-4e8d-b567-9ff5bcc146c7" />
+
 
 ### SERVER OUTPUT:
-![WhatsApp Image 2025-08-14 at 08 20 09_3be37ba3](https://github.com/user-attachments/assets/772620bf-a2d9-4d2b-8b2e-d10be1dc59c8)
+<img width="814" height="228" alt="Screenshot 2025-08-14 085258" src="https://github.com/user-attachments/assets/6830e104-1600-429a-b720-1a3b739dc8a9" />
+
+
 
 ## RESULT:
 The program is executed succesfully
